@@ -1,0 +1,151 @@
+                E-commerce Front End
+                --------------------
+
+1. Create an angular project        - ng new Cart           (Video 03/01/2023)
+2. Run angular                      - ng s -o
+3. Add bootstrap                    - go to official site of bootstrap and copy the css and js link. Paste it in the head section of index.html
+       font awesome                 - search font awesome cdn in chrome. Enter the first link. copy the link tag(</>) of the first link inside. Paste it inside the head section of index.html
+       google fonts                 - search google fonts in chrome. Select the fonts we like. From the selected families, copy only the import(do not copy the <style> outside of it). Paste it in styles.css
+
+        to check if google fonts is working. go to styles.css & open a body div. Inside it type: font-family: (an imported font family from google fonts. We can get it from google fonts website. in selected families at the bottom)
+        to check if bootstrap is working. in the app component html file, type anything that supports bootstrap like mt-5
+        to check if font awesome is working. search an icon in font awesome and copy its code in app component html. Remember, some of the icons might not work. Always go for the simple ones.
+
+4. Lazy Loading - 
+                    to load some contents faster 
+                  It is a process of loading components, modules, etc
+                  It improves application loading time
+
+    ----------------------------------------------------
+    ng g m products --route products --module app.module
+    ----------------------------------------------------
+
+5. Add router-outlet inside app.component.html
+
+6. Create components that should lazy loaded in the product module
+    - All-products      ng g c products/all-products        (all-products should be created inside products)
+    - Cart              ng g c products/cart
+    - wish-list         ng g c products/wish-list
+
+7. Setup path for each component
+    at product-routing module ts set the path ex:  { path: 'all-products', component: AllProductsComponent }
+    - product.module file
+
+8. ng g c page-not-found
+        Use '**' for paths for non existing pages
+
+9. Create header and footer
+        ng g c header
+        ng g c footer
+
+    go to start bootstrap shop homepage github
+    open it and click dist. Then open index.html
+    copy the nav section and paste it in header.html
+    copy the footer section and paste it in footer.html
+    copy the <section> and paste it in all-products.html
+
+    Modify them accordingly
+    
+    in header
+    ---------
+        change the button below of cart to link <a>
+        because, if we click button it kind of refreshes the page, link won't do that
+        also add routerLink to it 'products/cart'
+
+10. Component designing
+
+11. Backend integration
+
+12. Angular Services
+
+    ng g s products/api
+
+    the above command must be entered in cmd of front end. to create a service named api inside the folder products.
+
+13. import HttpClientModule in product module.
+    this is because we are sending http request to add items to cart.
+
+    in products.module.ts
+          imports: [
+                HttpClientModule
+                   ]
+
+        import { HttpClientModule } from '@angular/common/http'
+
+14. Dependenct Inject HttpClient class in api.services(vid 05/01/2023 time:01:20:00)
+
+    we need api services to display the contents from Backend on our front end
+
+    after adding commands in api services to get data from Backend, go to all-produts component and inject it there in its constructor
+
+15. Integration
+
+16. Design of wishlist and cart
+
+17. Search concept
+
+    ng g p products/pipes/filter
+    ----------------------------
+
+    2 files will be created.
+    this time we use pipe to share data between header component and AllProductsComponent.
+    when we search in header, the data from all-products must be retrieved
+
+        export class FilterPipe implements PipeTransform {
+
+          transform(allproducts:[],searchkey:string,propname:string): any[] {
+            in the above line, allproducts is the array containing items in allproducts
+            searchkey is the data we user searched for
+            propname is the title of the contents in the array
+
+
+          const result:any=[]
+
+             // if nothing is entered in the search box
+            if(!allproducts || searchkey=='' || propname==''){
+             return allproducts;
+              }
+
+             // if we search anything
+             // convert all upper keys to lower keys
+             allproducts.forEach((product:any)=>{
+               if(product[propname].trim().toLowerCase().includes(searchkey.toLowerCase())){
+                 result.push(product);
+                   }
+             })
+             return result;
+             }}
+             
+    Then in allproducts html file, add:
+            | filter:'gold' : 'title' in 
+             <div *ngFor="let product of allproducts | filter:'gold' : 'title' " class="col mb-5">
+
+        this  is internally searching the contents with titles containing terms gold
+
+
+    To externally search items 
+
+    define an event in the input tag of search bar and define it's function in the ts file.
+    then go to services.ts 
+    searchkey = new BehaviorSubject('')     // in export class
+//  BehaviorSubject is used to share a stream of data
+
+
+    Now go to header.ts 
+    inject api service in its constructor
+    in the export class, write the code below
+    search(event:any){
+    let searchkey=event.target.value
+    this.api.searchkey.next(searchkey)
+    // this.api.searchkey - from api component
+    // next(searchkey) -  the searchkey in this component
+    }
+
+    Now go to all-products ts file
+    write the below code below getproducts inside ngoninit itself
+    this.api.searchkey.subscribe(
+      (data:any)=>{
+      this.searchterm=data
+      }
+    )
+
